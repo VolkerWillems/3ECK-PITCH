@@ -157,8 +157,9 @@ export function PitchExperience() {
   return (
     <main className="pitch">
       <div className="stage" data-phase={phase}>
-        <video id={VIDEO_ID} className="video" playsInline autoPlay aria-label="Volker's AI twin" />
-        <div className="scrim" />
+        <div className="frame">
+          <video id={VIDEO_ID} className="video" playsInline autoPlay aria-label="Volker's AI twin" />
+        </div>
 
         <header className="topbar">
           <span className="badge">AI twin of Volker</span>

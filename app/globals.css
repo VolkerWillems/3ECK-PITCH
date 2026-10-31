@@ -43,11 +43,16 @@ a { color: var(--copper-light); }
 }
 .stage::before { content: ""; position: absolute; inset: 0; background: var(--surface-glow); z-index: -1; }
 
-.video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 400ms ease-out; background: #000; }
-.stage[data-phase="live"] .video { opacity: 1; }
-.scrim { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 400ms ease-out;
-  background: linear-gradient(to bottom, #000000a8 0, transparent 22%, transparent 55%, #000000d9 100%); }
-.stage[data-phase="live"] .scrim { opacity: 1; }
+/* The twin sits in a framed window under the top bar, so the face stays a believable size on every screen. */
+.frame {
+  position: absolute; z-index: 1;
+  top: 76px; left: 50%; transform: translateX(-50%);
+  width: min(320px, calc(100% - 32px)); aspect-ratio: 1 / 1;
+  border: 1px solid var(--copper-border); border-radius: var(--workspace-card-radius); overflow: hidden;
+  background: #000; opacity: 0; pointer-events: none; transition: opacity 400ms ease-out;
+}
+.stage[data-phase="live"] .frame { opacity: 1; }
+.video { width: 100%; height: 100%; object-fit: cover; object-position: center 25%; display: block; }
 
 /* ---- top bar ---- */
 .topbar {

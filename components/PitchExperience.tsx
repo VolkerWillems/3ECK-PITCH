@@ -171,7 +171,7 @@ export function PitchExperience() {
           <section className="intro" aria-labelledby="intro-title">
             <div className="hero">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/twin-portrait.png" alt="" />
+              <img src="/brand/volker-start.webp" alt="" />
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="logo" src="/brand/3eck-logo.png" alt="3ECK Technology" />

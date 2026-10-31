@@ -157,6 +157,7 @@ export function PitchExperience() {
   return (
     <main className="pitch">
       <div className="stage" data-phase={phase}>
+        <div className="frame-glow" aria-hidden="true" />
         <div className="frame">
           <video id={VIDEO_ID} className="video" playsInline autoPlay aria-label="Volker's AI twin" />
         </div>

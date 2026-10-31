@@ -78,8 +78,6 @@ a { color: var(--copper-light); }
   mask-composite: intersect;
 }
 .video { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; display: block; filter: grayscale(1) contrast(1.06) brightness(1.02); }
-/* Sits on the faded lower edge of the twin, so the logo below can move down. */
-.hint-floating { position: absolute; z-index: 3; left: 0; right: 0; top: calc(96px + min(46%, 420px) - 30px); margin: 0; padding: 0 var(--pad); pointer-events: none; }
 .live-logo { align-self: center; width: min(168px, 44%); height: auto; margin: 0 0 -6px; }
 
 /* ---- top bar ---- */

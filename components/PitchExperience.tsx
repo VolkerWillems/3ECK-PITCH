@@ -271,8 +271,6 @@ export function PitchExperience() {
           </section>
         )}
 
-        {phase === "live" && !challengeStarted && <p className="hint hint-floating">Your 60 seconds start when you speak.</p>}
-
         <StatusSheet ref={sheetRef} />
       </div>
     </main>

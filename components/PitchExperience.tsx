@@ -229,7 +229,6 @@ export function PitchExperience() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="live-logo" src="/brand/3eck-logo.png" alt="3ECK Technology" />
             {micDenied && <p className="notice" role="alert">Microphone is blocked. You can type your questions instead.</p>}
-            {!challengeStarted && <p className="hint">Your 60 seconds start when you speak.</p>}
             <p className="caption" aria-live="polite">{caption}</p>
             {lastUser && <p className="caption you">You: {lastUser}</p>}
             {typing && (
@@ -271,6 +270,8 @@ export function PitchExperience() {
             </div>
           </section>
         )}
+
+        {phase === "live" && !challengeStarted && <p className="hint hint-floating">Your 60 seconds start when you speak.</p>}
 
         <StatusSheet ref={sheetRef} />
       </div>

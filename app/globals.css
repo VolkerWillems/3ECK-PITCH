@@ -16,8 +16,8 @@
   --pad: clamp(24px, 7vw, 32px);
   --pad-top: 20px;
   --pad-bottom: 32px;
-  /* The studio backdrop of the twin video; tune this if the stream edge still shows. */
-  --twin-ground: #241f1b;
+  /* The studio backdrop of the twin video, now in grey like the video; tune this if the stream edge still shows. */
+  --twin-ground: #1d1e21;
 }
 
 * { box-sizing: border-box; }
@@ -77,8 +77,10 @@ a { color: var(--copper-light); }
   mask-image: linear-gradient(to right, transparent 0, #000 22%, #000 78%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 14%, #000 54%, transparent 100%);
   mask-composite: intersect;
 }
-.video { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; display: block; }
-.live-logo { align-self: center; width: min(210px, 54%); height: auto; margin-bottom: 2px; }
+.video { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; display: block; filter: grayscale(1) contrast(1.06) brightness(1.02); }
+/* Sits on the faded lower edge of the twin, so the logo below can move down. */
+.hint-floating { position: absolute; z-index: 3; left: 0; right: 0; top: calc(132px + min(40%, 360px) - 30px); margin: 0; padding: 0 var(--pad); pointer-events: none; }
+.live-logo { align-self: center; width: min(210px, 54%); height: auto; margin: 0 0 -6px; }
 
 /* ---- top bar ---- */
 .topbar {

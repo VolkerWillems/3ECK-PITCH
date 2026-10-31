@@ -167,10 +167,14 @@ export function PitchExperience() {
         </header>
 
         {phase === "intro" && (
-          <section className="panel" aria-labelledby="intro-title">
-            <h1 id="intro-title">60 seconds.</h1>
-            <p className="lead">Challenge Volker&apos;s AI twin. Ask something hard, or bring a real business problem.</p>
-            <p className="fine">You will be talking to an AI, not to Volker himself.</p>
+          <section className="intro" aria-labelledby="intro-title">
+            <div className="hero">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/twin-portrait.png" alt="" />
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="logo" src="/brand/3eck-logo.png" alt="3ECK Technology" />
+            <h1 id="intro-title" className="tagline">60 seconds with Volker&apos;s AI twin</h1>
             {needsCode && (
               <div className="field">
                 <label htmlFor="code">Invitation code</label>
@@ -178,11 +182,12 @@ export function PitchExperience() {
               </div>
             )}
             {error && <p className="notice" role="alert">{error}</p>}
-            <div className="stack">
-              <button type="button" className="btn btn-primary" onClick={start}>Start the challenge</button>
-              <button type="button" className="btn btn-ghost" onClick={() => sheetRef.current?.showModal()}><InfoIcon />What is real today</button>
+            <button type="button" className="btn btn-primary" onClick={start}>Invest now</button>
+            <div className="links">
+              <button type="button" onClick={() => sheetRef.current?.showModal()}>What is real today</button>
+              <a href="/privacy">Privacy</a>
             </div>
-            <p className="fine">Needs your microphone. Your voice is processed live by our avatar partner, Anam. Please do not share confidential information. <a href="/privacy">Privacy</a></p>
+            <p className="fine">You will talk to an AI, not to Volker himself. Needs your microphone. Your voice is processed live by our avatar partner, Anam. Please do not share confidential information.</p>
           </section>
         )}
 

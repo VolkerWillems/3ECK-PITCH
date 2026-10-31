@@ -50,16 +50,16 @@ a { color: var(--copper-light); }
   .stage { height: min(100dvh, 900px); border: 1px solid var(--copper-border); border-radius: var(--workspace-card-radius); box-shadow: var(--shadow-xl); }
 }
 
-/* The twin sits in a framed window under the top bar, so the face stays a believable size on every screen. */
+/* Same composition as the intro (Figma Invest-app): the twin is large and its edges fade into the dark, no box. */
 .frame {
-  position: absolute; z-index: 1;
-  top: 76px; left: 50%; transform: translateX(-50%);
-  width: min(320px, calc(100% - 32px)); aspect-ratio: 1 / 1;
-  border: 1px solid var(--copper-border); border-radius: var(--workspace-card-radius); overflow: hidden;
-  background: #000; opacity: 0; pointer-events: none; transition: opacity 400ms ease-out;
+  position: absolute; z-index: 1; top: 56px; left: 0; right: 0; height: min(54%, 480px);
+  opacity: 0; pointer-events: none; transition: opacity 400ms ease-out;
+  -webkit-mask-image: radial-gradient(ellipse 64% 62% at 50% 46%, #000 42%, transparent 100%);
+  mask-image: radial-gradient(ellipse 64% 62% at 50% 46%, #000 42%, transparent 100%);
 }
 .stage[data-phase="live"] .frame { opacity: 1; }
-.video { width: 100%; height: 100%; object-fit: cover; object-position: center 25%; display: block; }
+.video { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; display: block; }
+.live-logo { align-self: center; width: min(120px, 32%); height: auto; margin-bottom: 2px; }
 
 /* ---- top bar ---- */
 .topbar {

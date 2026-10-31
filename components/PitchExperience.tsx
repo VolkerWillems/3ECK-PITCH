@@ -201,6 +201,8 @@ export function PitchExperience() {
 
         {phase === "live" && (
           <section className="live" aria-label="Conversation">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="live-logo" src="/brand/3eck-logo.png" alt="3ECK Technology" />
             {micDenied && <p className="notice" role="alert">Microphone is blocked. You can type your questions instead.</p>}
             <p className="caption" aria-live="polite">{caption}</p>
             {lastUser && <p className="caption you">You: {lastUser}</p>}

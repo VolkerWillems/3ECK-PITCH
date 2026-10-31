@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { applyStreamEvent, displayBrand, latestCaption, normalizeMessages, tailCaption, type LiveCaption, type TranscriptLine } from "@/lib/pitch/transcript";
 import { HARD_STOP_SECONDS } from "@/lib/pitch/timer";
-import { Clock } from "./Clock";
 import { ContactCard } from "./ContactCard";
 import { StatusSheet } from "./StatusSheet";
 import { CloseIcon, InfoIcon, KeyboardIcon, MicIcon, MicOffIcon } from "./icons";
@@ -29,8 +28,6 @@ export function PitchExperience() {
   const [code, setCode] = useState("");
   const [lines, setLines] = useState<TranscriptLine[]>([]);
   const [live, setLive] = useState<LiveCaption | null>(null);
-  const [elapsedMs, setElapsedMs] = useState(0);
-  const [challengeStarted, setChallengeStarted] = useState(false);
   const [muted, setMuted] = useState(false);
   const [micDenied, setMicDenied] = useState(false);
   const [typing, setTyping] = useState(false);
@@ -39,7 +36,6 @@ export function PitchExperience() {
   const clientRef = useRef<AnamClient | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef(0);
-  const challengeAtRef = useRef<number | null>(null);
   const endingRef = useRef(false);
   const sheetRef = useRef<HTMLDialogElement>(null);
 
@@ -65,27 +61,14 @@ export function PitchExperience() {
     [stopTimer],
   );
 
-  // The session clock runs from the first video frame and ends the session for good. The 60-second challenge only
-  // starts when the visitor first speaks or types, so the twin's greeting does not eat into it.
+  // No countdown is shown. The clock only ends the session for good, a fixed time after the twin appears.
   const startClock = useCallback(() => {
     stopTimer();
     startedAtRef.current = Date.now();
-    challengeAtRef.current = null;
-    setChallengeStarted(false);
-    setElapsedMs(0);
     timerRef.current = setInterval(() => {
-      const now = Date.now();
-      if (challengeAtRef.current !== null) setElapsedMs(now - challengeAtRef.current);
-      if (now - startedAtRef.current >= HARD_STOP_SECONDS * 1000) void finish();
-    }, 250);
+      if (Date.now() - startedAtRef.current >= HARD_STOP_SECONDS * 1000) void finish();
+    }, 1000);
   }, [finish, stopTimer]);
-
-  const beginChallenge = useCallback(() => {
-    if (challengeAtRef.current !== null) return;
-    challengeAtRef.current = Date.now();
-    setChallengeStarted(true);
-    setElapsedMs(0);
-  }, []);
 
   useEffect(() => () => {
     stopTimer();
@@ -131,7 +114,6 @@ export function PitchExperience() {
         setMicDenied(true);
         setTyping(true);
       });
-      client.addListener(AnamEvent.USER_SPEECH_STARTED, () => beginChallenge());
       client.addListener(AnamEvent.VIDEO_PLAY_STARTED, () => {
         setPhase("live");
         startClock();
@@ -167,7 +149,6 @@ export function PitchExperience() {
     if (!text || !clientRef.current) return;
     try {
       clientRef.current.sendUserMessage(text);
-      beginChallenge();
       setDraft("");
     } catch {
       setError("Your message could not be sent. Try again.");
@@ -176,7 +157,6 @@ export function PitchExperience() {
 
   const caption = displayBrand(live ? tailCaption(live.text) : latestCaption(lines));
   const lastUser = [...lines].reverse().find((l) => l.role === "user")?.text;
-  const showStage = phase === "live";
 
   return (
     <main className="pitch">
@@ -188,7 +168,6 @@ export function PitchExperience() {
 
         <header className="topbar">
           <span className="badge">AI twin of Volker</span>
-          {showStage && <Clock elapsedMs={elapsedMs} waiting={!challengeStarted} />}
         </header>
 
         {phase === "intro" && (

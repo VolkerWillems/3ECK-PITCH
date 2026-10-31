@@ -6,7 +6,7 @@ Mobile-first investor experience: sixty seconds with Volker's AI twin, shown in 
 
 1. The visitor taps **Start**. The browser asks `POST /api/session` for a short-lived Anam session token.
 2. The server exchanges `ANAM_API_KEY` for that token (the key never reaches the browser), after an optional invitation code and rate limits.
-3. The browser streams the persona into the page with `@anam-ai/js-sdk`, shows live captions and a real 60-second timer (the twin does not know the time), and ends the session after 180 seconds at the latest.
+3. The browser streams the persona into the page with `@anam-ai/js-sdk`, shows live captions (no countdown is shown), and ends the session 240 seconds after the twin appears at the latest.
 
 Fallbacks: microphone blocked or unwanted leads to typing (`sendUserMessage`); every error state has a clear message; the contact address is always visible as text.
 

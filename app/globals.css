@@ -62,9 +62,9 @@ a { color: var(--copper-light); }
 .frame-glow { -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 100%); mask-image: linear-gradient(to bottom, #000 62%, transparent 100%); background: radial-gradient(ellipse 80% 62% at 50% 42%, var(--twin-ground) 0%, color-mix(in srgb, var(--twin-ground) 45%, var(--pitch-bg)) 55%, var(--pitch-bg) 100%); }
 .frame {
   top: 40px; height: min(60%, 520px);
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 22%, #000 78%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 14%, #000 66%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 22%, #000 78%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 14%, #000 54%, transparent 100%);
   -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to right, transparent 0, #000 22%, #000 78%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 14%, #000 66%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 22%, #000 78%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 14%, #000 54%, transparent 100%);
   mask-composite: intersect;
 }
 .video { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; display: block; }

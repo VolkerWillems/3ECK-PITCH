@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { latestCaption, normalizeMessages, type TranscriptLine } from "@/lib/pitch/transcript";
+import { applyStreamEvent, latestCaption, normalizeMessages, tailCaption, type LiveCaption, type TranscriptLine } from "@/lib/pitch/transcript";
 import { HARD_STOP_SECONDS } from "@/lib/pitch/timer";
 import { Clock } from "./Clock";
 import { ContactCard } from "./ContactCard";
@@ -28,6 +28,7 @@ export function PitchExperience() {
   const [needsCode, setNeedsCode] = useState(false);
   const [code, setCode] = useState("");
   const [lines, setLines] = useState<TranscriptLine[]>([]);
+  const [live, setLive] = useState<LiveCaption | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [muted, setMuted] = useState(false);
   const [micDenied, setMicDenied] = useState(false);
@@ -82,6 +83,7 @@ export function PitchExperience() {
     endingRef.current = false;
     setError(null);
     setLines([]);
+    setLive(null);
     setMuted(false);
     setMicDenied(false);
     setTyping(false);
@@ -104,7 +106,14 @@ export function PitchExperience() {
       const client = createClient(data.sessionToken);
       clientRef.current = client;
 
-      client.addListener(AnamEvent.MESSAGE_HISTORY_UPDATED, (history: unknown) => setLines(normalizeMessages(history)));
+      client.addListener(AnamEvent.MESSAGE_HISTORY_UPDATED, (history: unknown) => {
+        setLines(normalizeMessages(history));
+        setLive(null);
+      });
+      // words arrive while the twin is still speaking: show them as they come
+      client.addListener(AnamEvent.MESSAGE_STREAM_EVENT_RECEIVED, (event: { id: string; content: string; role: unknown }) =>
+        setLive((current) => applyStreamEvent(current, event)),
+      );
       client.addListener(AnamEvent.MIC_PERMISSION_DENIED, () => {
         setMicDenied(true);
         setTyping(true);
@@ -150,7 +159,7 @@ export function PitchExperience() {
     }
   }
 
-  const caption = latestCaption(lines);
+  const caption = live ? tailCaption(live.text) : latestCaption(lines);
   const lastUser = [...lines].reverse().find((l) => l.role === "user")?.text;
   const showStage = phase === "live";
 

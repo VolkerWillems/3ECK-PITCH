@@ -35,3 +35,26 @@ describe("latestCaption", () => {
     expect(caption).not.toMatch(/wor…$/);
   });
 });
+
+import { applyStreamEvent, tailCaption } from "./transcript";
+
+describe("live captions", () => {
+  it("builds one sentence from chunks of the same message and restarts for a new one", () => {
+    let live = applyStreamEvent(null, { id: "a", role: "persona", content: "Hello " });
+    live = applyStreamEvent(live, { id: "a", role: "persona", content: "there." });
+    expect(live).toEqual({ id: "a", text: "Hello there." });
+    live = applyStreamEvent(live, { id: "b", role: "persona", content: "Next" });
+    expect(live).toEqual({ id: "b", text: "Next" });
+  });
+  it("ignores what the visitor says", () => {
+    expect(applyStreamEvent({ id: "a", text: "x" }, { id: "u", role: "user", content: "hi" })).toEqual({ id: "a", text: "x" });
+  });
+  it("keeps the newest words of a long sentence", () => {
+    const text = Array.from({ length: 80 }, (_, i) => `w${i}`).join(" ");
+    const tail = tailCaption(text, 60);
+    expect(tail.startsWith("…")).toBe(true);
+    expect(tail.endsWith("w79")).toBe(true);
+    expect(tail.length).toBeLessThanOrEqual(62);
+    expect(tailCaption("short one")).toBe("short one");
+  });
+});

@@ -1,6 +1,6 @@
 export const CHALLENGE_SECONDS = 60;
-/** The conversation is ended for good after this long, so one visitor cannot run an open-ended session. */
-export const HARD_STOP_SECONDS = 180;
+/** The session is ended for good this long after the twin appears (greeting included), so no one can run an open-ended session. */
+export const HARD_STOP_SECONDS = 240;
 export const CLOSING_SECONDS = 10;
 
 export type TimerPhase = "running" | "closing" | "over";

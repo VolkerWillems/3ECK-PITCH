@@ -30,6 +30,7 @@ export function PitchExperience() {
   const [lines, setLines] = useState<TranscriptLine[]>([]);
   const [live, setLive] = useState<LiveCaption | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [challengeStarted, setChallengeStarted] = useState(false);
   const [muted, setMuted] = useState(false);
   const [micDenied, setMicDenied] = useState(false);
   const [typing, setTyping] = useState(false);
@@ -38,6 +39,7 @@ export function PitchExperience() {
   const clientRef = useRef<AnamClient | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef(0);
+  const challengeAtRef = useRef<number | null>(null);
   const endingRef = useRef(false);
   const sheetRef = useRef<HTMLDialogElement>(null);
 
@@ -63,16 +65,27 @@ export function PitchExperience() {
     [stopTimer],
   );
 
+  // The session clock runs from the first video frame and ends the session for good. The 60-second challenge only
+  // starts when the visitor first speaks or types, so the twin's greeting does not eat into it.
   const startClock = useCallback(() => {
     stopTimer();
     startedAtRef.current = Date.now();
+    challengeAtRef.current = null;
+    setChallengeStarted(false);
     setElapsedMs(0);
     timerRef.current = setInterval(() => {
-      const elapsed = Date.now() - startedAtRef.current;
-      setElapsedMs(elapsed);
-      if (elapsed >= HARD_STOP_SECONDS * 1000) void finish();
+      const now = Date.now();
+      if (challengeAtRef.current !== null) setElapsedMs(now - challengeAtRef.current);
+      if (now - startedAtRef.current >= HARD_STOP_SECONDS * 1000) void finish();
     }, 250);
   }, [finish, stopTimer]);
+
+  const beginChallenge = useCallback(() => {
+    if (challengeAtRef.current !== null) return;
+    challengeAtRef.current = Date.now();
+    setChallengeStarted(true);
+    setElapsedMs(0);
+  }, []);
 
   useEffect(() => () => {
     stopTimer();
@@ -118,6 +131,7 @@ export function PitchExperience() {
         setMicDenied(true);
         setTyping(true);
       });
+      client.addListener(AnamEvent.USER_SPEECH_STARTED, () => beginChallenge());
       client.addListener(AnamEvent.VIDEO_PLAY_STARTED, () => {
         setPhase("live");
         startClock();
@@ -153,6 +167,7 @@ export function PitchExperience() {
     if (!text || !clientRef.current) return;
     try {
       clientRef.current.sendUserMessage(text);
+      beginChallenge();
       setDraft("");
     } catch {
       setError("Your message could not be sent. Try again.");
@@ -173,7 +188,7 @@ export function PitchExperience() {
 
         <header className="topbar">
           <span className="badge">AI twin of Volker</span>
-          {showStage && <Clock elapsedMs={elapsedMs} />}
+          {showStage && <Clock elapsedMs={elapsedMs} waiting={!challengeStarted} />}
         </header>
 
         {phase === "intro" && (
@@ -214,6 +229,7 @@ export function PitchExperience() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="live-logo" src="/brand/3eck-logo.png" alt="3ECK Technology" />
             {micDenied && <p className="notice" role="alert">Microphone is blocked. You can type your questions instead.</p>}
+            {!challengeStarted && <p className="hint">Your 60 seconds start when you speak.</p>}
             <p className="caption" aria-live="polite">{caption}</p>
             {lastUser && <p className="caption you">You: {lastUser}</p>}
             {typing && (

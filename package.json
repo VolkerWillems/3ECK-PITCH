@@ -1,0 +1,27 @@
+{
+  "name": "3eck-pitch",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mobile-first investor experience: a 60-second conversation with Volker's AI twin.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anam-ai/js-sdk": "4.29.1",
+    "next": "16.4.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.0",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "typescript": "5.8.3",
+    "vitest": "5.0.5"
+  },
+  "type": "module"
+}

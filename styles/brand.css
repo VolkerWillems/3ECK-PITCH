@@ -1,0 +1,104 @@
+/* Canonical 3ECK brand contract.
+ * Colours, radius, spacing and shadows follow the owner's TweakCN theme; body Barlow Semi Condensed;
+ * headings keep the 3ECK rule:
+ * Quantico 400, uppercase, 2px tracking — impact from size and case, never weight.
+ */
+
+:root {
+  --font-sans: "Barlow Semi Condensed", ui-sans-serif, sans-serif, system-ui;
+  --font-serif: "Alegreya", ui-serif, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --font-body: "Barlow Semi Condensed", ui-sans-serif, sans-serif, system-ui;
+  --font-h1: "Quantico", ui-sans-serif, sans-serif, system-ui;
+  --font-heading: "Quantico", ui-sans-serif, sans-serif, system-ui;
+  --font-display: "Quantico", ui-sans-serif, sans-serif, system-ui;
+  --font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-editorial: "Alegreya", ui-serif, serif;
+
+  --body-letter-spacing: 0.025em;
+  --heading-letter-spacing: 2px;
+  --heading-transform: uppercase;
+  --text-body: 16px;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  /* Barlow Semi Condensed reads heavy: every Tailwind weight steps down one. */
+  --font-weight-medium: 400;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 600;
+  --body-line-height: 1.5;
+  --body-font-weight: 400;
+  --text-h1: clamp(1.75rem, 1.4rem + 1.2vw, 2.6rem);
+  --text-h2: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+  --text-h3: 1.125rem;
+  --text-h4: 1rem;
+  --text-h5: 0.9375rem;
+  --text-h6: 0.875rem;
+
+  /* 5.6px base: roomier than the TweakCN 0.3rem, owner request 2026-10-26. */
+  --radius: 0.35rem;
+  --control-height: 44px;
+  --spacing: 0.35rem;
+
+  --shadow-x: 15px;
+  --shadow-y: 15px;
+  --shadow-blur: 25px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.47;
+  --shadow-color: #000000;
+  --shadow-2xs: 15px 15px 25px 0px hsl(0 0% 0% / 0.23);
+  --shadow-xs: 15px 15px 25px 0px hsl(0 0% 0% / 0.23);
+  --shadow-sm: 15px 15px 25px 0px hsl(0 0% 0% / 0.47), 15px 1px 2px -1px hsl(0 0% 0% / 0.47);
+  --shadow: 15px 15px 25px 0px hsl(0 0% 0% / 0.47), 15px 1px 2px -1px hsl(0 0% 0% / 0.47);
+  --shadow-md: 15px 15px 25px 0px hsl(0 0% 0% / 0.47), 15px 2px 4px -1px hsl(0 0% 0% / 0.47);
+  --shadow-lg: 15px 15px 25px 0px hsl(0 0% 0% / 0.47), 15px 4px 6px -1px hsl(0 0% 0% / 0.47);
+  --shadow-xl: 15px 15px 25px 0px hsl(0 0% 0% / 0.47), 15px 8px 10px -1px hsl(0 0% 0% / 0.47);
+  --shadow-2xl: 15px 15px 25px 0px hsl(0 0% 0% / 1.17);
+
+  /* Copper accent family and depth surfaces (VIBER). */
+  --copper: #e78a53;
+  --copper-light: #f3b68f;
+  --copper-deep: #7e482f;
+  --copper-soft: #e78a531f;
+  --copper-border: #93593740;
+  --faint: #a7a39e;
+  --raised: #202124;
+  --surface-glow: radial-gradient(ellipse 680px 460px at 83% 6%, #42251925, transparent 80%);
+  --surface-card: linear-gradient(150deg, #1a191a, #111214);
+  --surface-hero: linear-gradient(125deg, #171415, #101012 40%, #17100d 100%);
+  --surface-rail: linear-gradient(155deg, #121214, #0a0a0c 52%, #060607);
+  --nav-active: linear-gradient(90deg, #53332258, #231e1b70);
+  --button-primary: linear-gradient(145deg, #efa56e, #d77c46);
+  --button-primary-hover: linear-gradient(145deg, #ffc08e, #e89155);
+
+  --max-content: 1380px;
+  /* Shared VIBER/Agent Studio workspace measurements. Edit here, never in app copies. */
+  --workspace-sidebar-width: 232px;
+  --workspace-topbar-height: 64px;
+  --workspace-content-width: var(--max-content);
+  --workspace-page-padding: clamp(1rem, 3vw, 3rem);
+  --workspace-section-gap: 2.75rem;
+  --workspace-card-gap: 0.875rem;
+  --workspace-panel-padding: clamp(1.25rem, 2.2vw, 1.75rem);
+  --workspace-hero-padding: clamp(1.75rem, 3.7vw, 3.75rem);
+  --workspace-card-radius: 0.35rem;
+  --workspace-card-min-width: 17rem;
+  --workspace-motion: 160ms ease-out;
+
+
+  --stroke-normal: 1px;
+  --stroke-bold: 2px;
+  --stroke-fat: 3px;
+}
+
+.dark {
+  --shadow-color: #0d0d0d;
+  --shadow-2xs: 15px 15px 25px 0px hsl(0 0% 5.0980% / 0.23);
+  --shadow-xs: 15px 15px 25px 0px hsl(0 0% 5.0980% / 0.23);
+  --shadow-sm: 15px 15px 25px 0px hsl(0 0% 5.0980% / 0.47), 15px 1px 2px -1px hsl(0 0% 5.0980% / 0.47);
+  --shadow: 15px 15px 25px 0px hsl(0 0% 5.0980% / 0.47), 15px 1px 2px -1px hsl(0 0% 5.0980% / 0.47);
+  --shadow-md: 15px 15px 25px 0px hsl(0 0% 5.0980% / 0.47), 15px 2px 4px -1px hsl(0 0% 5.0980% / 0.47);
+  --shadow-lg: 15px 15px 25px 0px hsl(0 0% 5.0980% / 0.47), 15px 4px 6px -1px hsl(0 0% 5.0980% / 0.47);
+  --shadow-xl: 15px 15px 25px 0px hsl(0 0% 5.0980% / 0.47), 15px 8px 10px -1px hsl(0 0% 5.0980% / 0.47);
+  --shadow-2xl: 15px 15px 25px 0px hsl(0 0% 5.0980% / 1.17);
+}

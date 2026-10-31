@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { applyStreamEvent, latestCaption, normalizeMessages, tailCaption, type LiveCaption, type TranscriptLine } from "@/lib/pitch/transcript";
+import { applyStreamEvent, displayBrand, latestCaption, normalizeMessages, tailCaption, type LiveCaption, type TranscriptLine } from "@/lib/pitch/transcript";
 import { HARD_STOP_SECONDS } from "@/lib/pitch/timer";
 import { Clock } from "./Clock";
 import { ContactCard } from "./ContactCard";
@@ -159,7 +159,7 @@ export function PitchExperience() {
     }
   }
 
-  const caption = live ? tailCaption(live.text) : latestCaption(lines);
+  const caption = displayBrand(live ? tailCaption(live.text) : latestCaption(lines));
   const lastUser = [...lines].reverse().find((l) => l.role === "user")?.text;
   const showStage = phase === "live";
 

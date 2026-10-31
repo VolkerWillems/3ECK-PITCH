@@ -58,3 +58,12 @@ describe("live captions", () => {
     expect(tailCaption("short one")).toBe("short one");
   });
 });
+
+import { displayBrand } from "./transcript";
+
+describe("displayBrand", () => {
+  it("shows the pronounced spelling as the brand name", () => {
+    expect(displayBrand("Welcome to Drei Ekk. Drei-Ekk builds agents, drei eck too.")).toBe("Welcome to 3ECK. 3ECK builds agents, 3ECK too.");
+    expect(displayBrand("Three is a number")).toBe("Three is a number");
+  });
+});

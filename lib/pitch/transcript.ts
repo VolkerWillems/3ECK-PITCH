@@ -43,3 +43,8 @@ export function tailCaption(text: string, maxChars = 220): string {
   const space = cut.indexOf(" ");
   return `…${(space >= 0 && space < maxChars * 0.4 ? cut.slice(space + 1) : cut).trimStart()}`;
 }
+
+/** The twin is told to write the name as it is pronounced ("Drei Ekk"); on screen it is shown as the brand: 3ECK. */
+export function displayBrand(text: string): string {
+  return text.replace(/\bdrei[\s-]*e(?:kk?|ck)\b/gi, "3ECK");
+}

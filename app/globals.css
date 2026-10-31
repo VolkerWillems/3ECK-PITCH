@@ -193,3 +193,13 @@ dialog.sheet::backdrop { background: #000000b3; }
 .doc { max-width: 40rem; margin: 0 auto; padding: 48px var(--pad) 64px; display: flex; flex-direction: column; gap: 18px; }
 .doc h1 { font-size: var(--text-h1); }
 .doc h2 { font-size: var(--text-h2); color: var(--copper-light); margin-top: 10px; }
+
+/* ---- try our other agents ---- */
+.demo { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; border: 1px solid var(--copper-border); background: var(--surface-card); border-radius: var(--radius); padding: 16px; }
+.demo h3 { font-size: var(--text-h3); color: var(--foreground); }
+.demo p { color: var(--muted-foreground); font-size: var(--text-sm); }
+.demo .btn { align-self: stretch; }
+.tag { font-family: var(--font-code); font-size: var(--text-xs); letter-spacing: 0.08em; text-transform: uppercase; color: var(--copper-light); border: 1px solid var(--copper-border); background: var(--copper-soft); padding: 3px 8px; border-radius: var(--radius); }
+.callform { display: flex; flex-direction: column; gap: 14px; align-self: stretch; }
+.check { display: flex; gap: 12px; align-items: flex-start; font-size: var(--text-sm); line-height: 1.4; cursor: pointer; }
+.check input { width: 22px; height: 22px; margin: 1px 0 0; flex: none; accent-color: var(--pitch-primary); }

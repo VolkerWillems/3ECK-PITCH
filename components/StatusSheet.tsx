@@ -5,7 +5,7 @@ import { STATUS, STATUS_AS_OF, TRACTION_NOTE } from "@/lib/pitch/status";
 import { CloseIcon } from "./icons";
 
 /** A native dialog gives focus trapping, Escape to close and focus return for free. */
-export const StatusSheet = forwardRef<HTMLDialogElement>(function StatusSheet(_props, ref) {
+export const StatusSheet = forwardRef<HTMLDialogElement, { onTry?: () => void }>(function StatusSheet({ onTry }, ref) {
   return (
     <dialog ref={ref} className="sheet" aria-labelledby="status-title">
       <div className="sheet-body">
@@ -27,6 +27,11 @@ export const StatusSheet = forwardRef<HTMLDialogElement>(function StatusSheet(_p
           </section>
         ))}
         <p className="traction">{TRACTION_NOTE}</p>
+        {onTry && (
+          <button type="button" className="btn btn-primary" onClick={() => { (ref as React.RefObject<HTMLDialogElement>).current?.close(); onTry(); }}>
+            Try our other agents
+          </button>
+        )}
       </div>
     </dialog>
   );

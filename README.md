@@ -22,6 +22,8 @@ npm run dev
 |---|---|
 | `ANAM_API_KEY` | Server only. Create it in Anam Lab. |
 | `ANAM_PERSONA_ID` | The persona with the investor prompt and knowledge. |
+| `ANAM_PERSONA_ID_JEROEN` | Optional. The Jeroen sales avatar for the "Test sales avatar" button. |
+| `ELEVENLABS_API_KEY`, `ELEVENLABS_CALL_AGENT_ID`, `ELEVENLABS_PHONE_NUMBER_ID` | Optional, all three. The one-time outbound call (Jay). Also needs the Upstash Redis store (Vercel, Storage, Marketplace), which adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`. |
 | `PITCH_INVITE_CODE` | Optional. When set, visitors must enter it. |
 | `PITCH_MAX_SESSIONS_PER_IP`, `PITCH_MAX_SESSIONS_PER_DAY` | Optional limits (defaults 3 per 10 minutes per visitor, 100 per day). |
 
@@ -49,3 +51,13 @@ npm test && npm run typecheck && npm run build
 - A poster image or looping still for the intro (the top half is empty by design until one exists).
 - Deploy to Vercel and connect a domain (owner decision).
 - Optional PWA install and a shared durable rate limit.
+
+## One-time call codes
+
+"Test outbound sales agent" lets a visitor enter a personal code and a Dutch mobile number and be called once by Jay. Each code works once, each number can be called once, and both are claimed before the call is placed and released if it fails to start. Only SHA-256 hashes of the codes are in the repository (`lib/server/call-code-hashes.json`); the plain codes are never committed.
+
+```bash
+node scripts/make-codes.mjs 50 /path/outside/the/repo/codes.txt   # more codes: hashes are appended, plain codes go to that file
+```
+
+Calls to non-Dutch numbers are refused until the phone line can place them.

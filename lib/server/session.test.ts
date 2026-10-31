@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { clientKey, inviteCodeMatches, mintSessionToken, readSessionConfig, SessionTokenError } from "./session";
+import { clientKey, inviteCodeMatches, mintSessionToken, parsePersona, readSessionConfig, SessionTokenError } from "./session";
 import { createLimiter } from "./rate-limit";
 
 describe("readSessionConfig", () => {
   it("needs both the API key and the persona id", () => {
     expect(readSessionConfig({})).toBeNull();
     expect(readSessionConfig({ ANAM_API_KEY: "k" })).toBeNull();
-    expect(readSessionConfig({ ANAM_API_KEY: " k ", ANAM_PERSONA_ID: " p " })).toMatchObject({ apiKey: "k", personaId: "p", maxPerIp: 3, maxPerDay: 100 });
+    expect(readSessionConfig({ ANAM_API_KEY: " k ", ANAM_PERSONA_ID: " p " })).toMatchObject({ apiKey: "k", personas: { twin: "p", jeroen: undefined }, maxPerIp: 3, maxPerDay: 100 });
   });
   it("reads limits and ignores nonsense values", () => {
     const c = readSessionConfig({ ANAM_API_KEY: "k", ANAM_PERSONA_ID: "p", PITCH_MAX_SESSIONS_PER_IP: "5", PITCH_MAX_SESSIONS_PER_DAY: "-1", PITCH_INVITE_CODE: " abc " });
@@ -68,5 +68,15 @@ describe("createLimiter", () => {
     expect(limiter.hit("b").allowed).toBe(true);
     t = 1000;
     expect(limiter.hit("a").allowed).toBe(true);
+  });
+});
+
+describe("personas", () => {
+  it("reads the optional Jeroen persona and defaults to the twin", () => {
+    expect(readSessionConfig({ ANAM_API_KEY: "k", ANAM_PERSONA_ID: "p", ANAM_PERSONA_ID_JEROEN: " j " })?.personas).toEqual({ twin: "p", jeroen: "j" });
+    expect(parsePersona(undefined)).toBe("twin");
+    expect(parsePersona("jeroen")).toBe("jeroen");
+    expect(parsePersona("admin")).toBeNull();
+    expect(parsePersona(3)).toBeNull();
   });
 });

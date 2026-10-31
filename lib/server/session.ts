@@ -2,9 +2,13 @@ import { timingSafeEqual } from "node:crypto";
 
 export type SessionEnv = Record<string, string | undefined>;
 
+export type PersonaKey = "twin" | "jeroen";
+export const PERSONA_KEYS: PersonaKey[] = ["twin", "jeroen"];
+
 export type SessionConfig = {
   apiKey: string;
-  personaId: string;
+  /** Anam persona ids by key. The twin is required; the others are optional demos. */
+  personas: Partial<Record<PersonaKey, string>>;
   inviteCode?: string;
   maxPerIp: number;
   maxPerDay: number;
@@ -17,15 +21,20 @@ const positiveInt = (value: string | undefined, fallback: number) => {
 
 export function readSessionConfig(env: SessionEnv): SessionConfig | null {
   const apiKey = env.ANAM_API_KEY?.trim();
-  const personaId = env.ANAM_PERSONA_ID?.trim();
-  if (!apiKey || !personaId) return null;
+  const twin = env.ANAM_PERSONA_ID?.trim();
+  if (!apiKey || !twin) return null;
   return {
     apiKey,
-    personaId,
+    personas: { twin, jeroen: env.ANAM_PERSONA_ID_JEROEN?.trim() || undefined },
     inviteCode: env.PITCH_INVITE_CODE?.trim() || undefined,
     maxPerIp: positiveInt(env.PITCH_MAX_SESSIONS_PER_IP, 3),
     maxPerDay: positiveInt(env.PITCH_MAX_SESSIONS_PER_DAY, 100),
   };
+}
+
+export function parsePersona(value: unknown): PersonaKey | null {
+  if (value === undefined || value === null) return "twin";
+  return PERSONA_KEYS.includes(value as PersonaKey) ? (value as PersonaKey) : null;
 }
 
 /** Compare without leaking how many characters matched. */
@@ -47,7 +56,7 @@ const TOKEN_URL = "https://api.anam.ai/v1/auth/session-token";
 export class SessionTokenError extends Error {}
 
 /** Exchange the server-side API key for a short-lived token the browser can use. */
-export async function mintSessionToken(config: Pick<SessionConfig, "apiKey" | "personaId">, fetchImpl: typeof fetch = fetch): Promise<string> {
+export async function mintSessionToken(config: { apiKey: string; personaId: string }, fetchImpl: typeof fetch = fetch): Promise<string> {
   let response: Response;
   try {
     response = await fetchImpl(TOKEN_URL, {

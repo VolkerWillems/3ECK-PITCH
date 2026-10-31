@@ -5,10 +5,14 @@ import { applyStreamEvent, displayBrand, latestCaption, normalizeMessages, tailC
 import { HARD_STOP_SECONDS } from "@/lib/pitch/timer";
 import { ContactCard } from "./ContactCard";
 import { StatusSheet } from "./StatusSheet";
+import { TrySheet } from "./TrySheet";
 import { CloseIcon, InfoIcon, KeyboardIcon, MicIcon, MicOffIcon } from "./icons";
 
 type Phase = "intro" | "connecting" | "live" | "ended" | "error";
 type AnamClient = import("@anam-ai/js-sdk").AnamClient;
+type PersonaKey = "twin" | "jeroen";
+
+const BADGE: Record<PersonaKey, string> = { twin: "AI twin of Volker", jeroen: "Jeroen · EarthSpas sales avatar" };
 
 const VIDEO_ID = "twin-video";
 
@@ -17,12 +21,14 @@ const MESSAGES: Record<string, string> = {
   invite_required: "Enter your invitation code to start.",
   too_many_sessions: "You have started a few sessions already. Please wait a little and try again.",
   daily_limit: "The twin has reached today's limit. Please try again tomorrow.",
+  unknown_persona: "That demo is not available.",
   twin_unavailable: "The twin could not be reached. Please try again in a moment.",
   network: "No connection. Check your network and try again.",
 };
 
 export function PitchExperience() {
   const [phase, setPhase] = useState<Phase>("intro");
+  const [persona, setPersona] = useState<PersonaKey>("twin");
   const [error, setError] = useState<string | null>(null);
   const [needsCode, setNeedsCode] = useState(false);
   const [code, setCode] = useState("");
@@ -38,6 +44,7 @@ export function PitchExperience() {
   const startedAtRef = useRef(0);
   const endingRef = useRef(false);
   const sheetRef = useRef<HTMLDialogElement>(null);
+  const trySheetRef = useRef<HTMLDialogElement>(null);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -75,8 +82,9 @@ export function PitchExperience() {
     void clientRef.current?.stopStreaming().catch(() => undefined);
   }, [stopTimer]);
 
-  async function start() {
+  async function start(key: PersonaKey = "twin") {
     endingRef.current = false;
+    setPersona(key);
     setError(null);
     setLines([]);
     setLive(null);
@@ -88,7 +96,7 @@ export function PitchExperience() {
     try {
       let res: Response;
       try {
-        res = await fetch("/api/session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ inviteCode: code }) });
+        res = await fetch("/api/session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ inviteCode: code, persona: key }) });
       } catch {
         throw new Error("network");
       }
@@ -136,6 +144,12 @@ export function PitchExperience() {
     }
   }
 
+  /** Start another demo avatar, ending the conversation that is running. */
+  async function switchTo(key: PersonaKey) {
+    if (clientRef.current) await finish();
+    await start(key);
+  }
+
   function toggleMute() {
     const client = clientRef.current;
     if (!client) return;
@@ -163,11 +177,11 @@ export function PitchExperience() {
       <div className="stage" data-phase={phase}>
         <div className="frame-glow" aria-hidden="true" />
         <div className="frame">
-          <video id={VIDEO_ID} className="video" playsInline autoPlay aria-label="Volker's AI twin" />
+          <video id={VIDEO_ID} className="video" playsInline autoPlay aria-label={persona === "twin" ? "Volker's AI twin" : "Jeroen, sales avatar for EarthSpas"} />
         </div>
 
         <header className="topbar">
-          <span className="badge">AI twin of Volker</span>
+          <span className="badge">{BADGE[persona]}</span>
         </header>
 
         {phase === "intro" && (
@@ -186,9 +200,10 @@ export function PitchExperience() {
               </div>
             )}
             {error && <p className="notice" role="alert">{error}</p>}
-            <button type="button" className="btn btn-primary" onClick={start}>Invest now</button>
+            <button type="button" className="btn btn-primary" onClick={() => void start("twin")}>Invest now</button>
             <div className="links">
               <button type="button" onClick={() => sheetRef.current?.showModal()}>What is real today</button>
+              <button type="button" onClick={() => trySheetRef.current?.showModal()}>Try our agents</button>
               <a href="/privacy">Privacy</a>
             </div>
             <p className="fine">You will talk to an AI, not to Volker himself. Needs your microphone. Your voice is processed live by our avatar partner, Anam. Please do not share confidential information.</p>
@@ -229,11 +244,12 @@ export function PitchExperience() {
 
         {phase === "ended" && (
           <section className="panel" aria-labelledby="end-title">
-            <h2 id="end-title">That was the twin.</h2>
-            <p className="lead">If it made you curious, the real Volker would love to talk.</p>
+            <h2 id="end-title">{persona === "twin" ? "That was the twin." : "That was Jeroen."}</h2>
+            <p className="lead">{persona === "twin" ? "If it made you curious, the real Volker would love to talk." : "A sales avatar like this can sit on your website. The real Volker would love to talk."}</p>
             <ContactCard />
             <div className="stack">
-              <button type="button" className="btn btn-primary" onClick={start}>Challenge it again</button>
+              <button type="button" className="btn btn-primary" onClick={() => void start(persona)}>{persona === "twin" ? "Challenge it again" : "Test it again"}</button>
+              <button type="button" className="btn btn-ghost" onClick={() => trySheetRef.current?.showModal()}>Try our other agents</button>
               <button type="button" className="btn btn-ghost" onClick={() => sheetRef.current?.showModal()}><InfoIcon />What is real today</button>
             </div>
           </section>
@@ -244,13 +260,14 @@ export function PitchExperience() {
             <h2 id="err-title">Not available right now</h2>
             <p className="notice" role="alert">{error}</p>
             <div className="stack">
-              <button type="button" className="btn btn-primary" onClick={start}>Try again</button>
+              <button type="button" className="btn btn-primary" onClick={() => void start(persona)}>Try again</button>
               <ContactCard />
             </div>
           </section>
         )}
 
-        <StatusSheet ref={sheetRef} />
+        <StatusSheet ref={sheetRef} onTry={() => trySheetRef.current?.showModal()} />
+        <TrySheet ref={trySheetRef} onStartAvatar={() => void switchTo("jeroen")} />
       </div>
     </main>
   );

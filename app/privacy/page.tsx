@@ -14,6 +14,12 @@ export default function PrivacyPage() {
         Your microphone audio and anything you type are sent live to our avatar provider, Anam, so the AI twin can hear and answer
         you. This page itself sets no tracking cookies and asks for no personal data, so please do not share confidential information.
       </p>
+      <h2>The demo call</h2>
+      <p>
+        If you use a personal code to be called by our outbound sales agent, your mobile number is sent to our voice partner,
+        ElevenLabs, to place that one call. We keep only a one-way hash of the number for 30 days, so the same number is not
+        called twice. You must tick a box to agree before a call is placed.
+      </p>
       <h2>Questions and deletion</h2>
       <p>
         Write to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. We will tell you what we hold and remove it on request.

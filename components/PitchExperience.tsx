@@ -26,7 +26,7 @@ const MESSAGES: Record<string, string> = {
   network: "No connection. Check your network and try again.",
 };
 
-export function PitchExperience() {
+export function PitchExperience({ embedded = false }: { embedded?: boolean }) {
   const [phase, setPhase] = useState<Phase>("intro");
   const [persona, setPersona] = useState<PersonaKey>("twin");
   const [error, setError] = useState<string | null>(null);
@@ -192,7 +192,7 @@ export function PitchExperience() {
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="logo" src="/brand/3eck-logo.png" alt="3ECK Technology" />
-            <h1 id="intro-title" className="tagline">60 seconds with Volker&apos;s AI twin</h1>
+            <h1 id="intro-title" className="tagline">{embedded ? "Talk to Volker's AI twin" : "60 seconds with Volker's AI twin"}</h1>
             {needsCode && (
               <div className="field">
                 <label htmlFor="code">Invitation code</label>
@@ -200,12 +200,16 @@ export function PitchExperience() {
               </div>
             )}
             {error && <p className="notice" role="alert">{error}</p>}
-            <button type="button" className="btn btn-primary" onClick={() => void start("twin")}>Invest now</button>
-            <div className="links">
-              <button type="button" onClick={() => sheetRef.current?.showModal()}>What is real today</button>
-              <button type="button" onClick={() => trySheetRef.current?.showModal()}>Try our agents</button>
-              <a href="/privacy">Privacy</a>
-            </div>
+            <button type="button" className="btn btn-primary" onClick={() => void start("twin")}>{embedded ? "Start conversation" : "Invest now"}</button>
+            {embedded ? (
+              <div className="links"><a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy</a></div>
+            ) : (
+              <div className="links">
+                <button type="button" onClick={() => sheetRef.current?.showModal()}>What is real today</button>
+                <button type="button" onClick={() => trySheetRef.current?.showModal()}>Try our agents</button>
+                <a href="/privacy">Privacy</a>
+              </div>
+            )}
             <p className="fine">You will talk to an AI, not to Volker himself. Needs your microphone. Your voice is processed live by our avatar partner, Anam. Please do not share confidential information.</p>
           </section>
         )}
@@ -237,20 +241,28 @@ export function PitchExperience() {
               </button>
               <button type="button" className="btn btn-round btn-end" onClick={() => void finish()} aria-label="End conversation"><CloseIcon /></button>
               <button type="button" className="btn btn-round" onClick={() => setTyping((v) => !v)} aria-pressed={typing} aria-label="Type instead"><KeyboardIcon /></button>
-              <button type="button" className="btn btn-round" onClick={() => sheetRef.current?.showModal()} aria-label="What is real today"><InfoIcon /></button>
+              {!embedded && <button type="button" className="btn btn-round" onClick={() => sheetRef.current?.showModal()} aria-label="What is real today"><InfoIcon /></button>}
             </div>
           </section>
         )}
 
         {phase === "ended" && (
           <section className="panel" aria-labelledby="end-title">
-            <h2 id="end-title">{persona === "twin" ? "That was the twin." : "That was Jeroen."}</h2>
-            <p className="lead">{persona === "twin" ? "If it made you curious, the real Volker would love to talk." : "A sales avatar like this can sit on your website. The real Volker would love to talk."}</p>
-            <ContactCard />
+            <h2 id="end-title">{embedded ? "Conversation ended." : persona === "twin" ? "That was the twin." : "That was Jeroen."}</h2>
+            {embedded ? <p className="lead">Thanks for talking with our AI twin.</p> : (
+              <>
+                <p className="lead">{persona === "twin" ? "If it made you curious, the real Volker would love to talk." : "A sales avatar like this can sit on your website. The real Volker would love to talk."}</p>
+                <ContactCard />
+              </>
+            )}
             <div className="stack">
-              <button type="button" className="btn btn-primary" onClick={() => void start(persona)}>{persona === "twin" ? "Challenge it again" : "Test it again"}</button>
-              <button type="button" className="btn btn-ghost" onClick={() => trySheetRef.current?.showModal()}>Try our other agents</button>
-              <button type="button" className="btn btn-ghost" onClick={() => sheetRef.current?.showModal()}><InfoIcon />What is real today</button>
+              <button type="button" className="btn btn-primary" onClick={() => void start(persona)}>{embedded ? "Talk again" : persona === "twin" ? "Challenge it again" : "Test it again"}</button>
+              {!embedded && (
+                <>
+                  <button type="button" className="btn btn-ghost" onClick={() => trySheetRef.current?.showModal()}>Try our other agents</button>
+                  <button type="button" className="btn btn-ghost" onClick={() => sheetRef.current?.showModal()}><InfoIcon />What is real today</button>
+                </>
+              )}
             </div>
           </section>
         )}
@@ -261,13 +273,17 @@ export function PitchExperience() {
             <p className="notice" role="alert">{error}</p>
             <div className="stack">
               <button type="button" className="btn btn-primary" onClick={() => void start(persona)}>Try again</button>
-              <ContactCard />
+              {!embedded && <ContactCard />}
             </div>
           </section>
         )}
 
-        <StatusSheet ref={sheetRef} onTry={() => trySheetRef.current?.showModal()} />
-        <TrySheet ref={trySheetRef} onStartAvatar={() => void switchTo("jeroen")} />
+        {!embedded && (
+          <>
+            <StatusSheet ref={sheetRef} onTry={() => trySheetRef.current?.showModal()} />
+            <TrySheet ref={trySheetRef} onStartAvatar={() => void switchTo("jeroen")} />
+          </>
+        )}
       </div>
     </main>
   );

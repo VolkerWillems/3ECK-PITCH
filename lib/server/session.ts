@@ -2,8 +2,8 @@ import { timingSafeEqual } from "node:crypto";
 
 export type SessionEnv = Record<string, string | undefined>;
 
-export type PersonaKey = "twin" | "jeroen";
-export const PERSONA_KEYS: PersonaKey[] = ["twin", "jeroen"];
+export type PersonaKey = "twin" | "jeroen" | "build";
+export const PERSONA_KEYS: PersonaKey[] = ["twin", "jeroen", "build"];
 
 export type SessionConfig = {
   apiKey: string;
@@ -25,7 +25,7 @@ export function readSessionConfig(env: SessionEnv): SessionConfig | null {
   if (!apiKey || !twin) return null;
   return {
     apiKey,
-    personas: { twin, jeroen: env.ANAM_PERSONA_ID_JEROEN?.trim() || undefined },
+    personas: { twin, jeroen: env.ANAM_PERSONA_ID_JEROEN?.trim() || undefined, build: env.ANAM_PERSONA_ID_BUILD?.trim() || twin },
     inviteCode: env.PITCH_INVITE_CODE?.trim() || undefined,
     maxPerIp: positiveInt(env.PITCH_MAX_SESSIONS_PER_IP, 3),
     maxPerDay: positiveInt(env.PITCH_MAX_SESSIONS_PER_DAY, 100),

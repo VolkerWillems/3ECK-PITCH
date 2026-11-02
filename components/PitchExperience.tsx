@@ -11,9 +11,9 @@ import { CloseIcon, InfoIcon, KeyboardIcon, MicIcon, MicOffIcon } from "./icons"
 
 type Phase = "intro" | "connecting" | "live" | "ended" | "error";
 type AnamClient = import("@anam-ai/js-sdk").AnamClient;
-type PersonaKey = "twin" | "jeroen";
+type PersonaKey = "twin" | "jeroen" | "build";
 
-const BADGE: Record<PersonaKey, string> = { twin: "AI twin of Volker", jeroen: "Jeroen · EarthSpas sales avatar" };
+const BADGE: Record<PersonaKey, string> = { twin: "AI twin of Volker", jeroen: "Jeroen · EarthSpas sales avatar", build: "3ECK AI twin · build intake" };
 
 const VIDEO_ID = "twin-video";
 
@@ -30,7 +30,7 @@ const MESSAGES: Record<string, string> = {
 export function PitchExperience({ mode = "pitch" }: { mode?: "pitch" | "build" }) {
   const isBuild = mode === "build";
   const [phase, setPhase] = useState<Phase>("intro");
-  const [persona, setPersona] = useState<PersonaKey>("twin");
+  const [persona, setPersona] = useState<PersonaKey>(isBuild ? "build" : "twin");
   const [error, setError] = useState<string | null>(null);
   const [needsCode, setNeedsCode] = useState(false);
   const [code, setCode] = useState("");
@@ -205,7 +205,7 @@ export function PitchExperience({ mode = "pitch" }: { mode?: "pitch" | "build" }
       <div className="stage" data-phase={phase}>
         <div className="frame-glow" aria-hidden="true" />
         <div className="frame">
-          <video id={VIDEO_ID} className="video" playsInline autoPlay aria-label={persona === "twin" ? "Volker's AI twin" : "Jeroen, sales avatar for EarthSpas"} />
+          <video id={VIDEO_ID} className="video" playsInline autoPlay aria-label={persona === "jeroen" ? "Jeroen, sales avatar for EarthSpas" : "Volker's AI twin"} />
         </div>
 
         <header className="topbar">
@@ -228,7 +228,7 @@ export function PitchExperience({ mode = "pitch" }: { mode?: "pitch" | "build" }
               </div>
             )}
             {error && <p className="notice" role="alert">{error}</p>}
-            <button type="button" className="btn btn-primary" onClick={() => void start("twin")}>{isBuild ? "Discuss my project" : "Invest now"}</button>
+            <button type="button" className="btn btn-primary" onClick={() => void start(isBuild ? "build" : "twin")}>{isBuild ? "Discuss my project" : "Invest now"}</button>
             <div className="links">
               <button type="button" onClick={() => sheetRef.current?.showModal()}>What is real today</button>
               <button type="button" onClick={() => trySheetRef.current?.showModal()}>Try our agents</button>

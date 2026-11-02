@@ -23,6 +23,6 @@ describe("conversationToBuildBrief", () => {
       { id: "2", role: "user", text: " Build a booking tool " },
       { id: "3", role: "user", text: "With a dashboard" },
     ])).toBe("Build a booking tool\nWith a dashboard");
-    expect(conversationToBuildBrief([{ id: "1", role: "user", text: "x".repeat(4500) }]).toHaveLength(MAX_BUILD_BRIEF_LENGTH);
+    expect(conversationToBuildBrief([{ id: "1", role: "user", text: "x".repeat(4500) }])).toHaveLength(MAX_BUILD_BRIEF_LENGTH);
   });
 });

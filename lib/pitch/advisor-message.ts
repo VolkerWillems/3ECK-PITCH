@@ -6,7 +6,7 @@ export function isTrustedAdvisorParent(origin: string): boolean {
     if (url.origin !== origin) return false;
     if (origin === "https://site.3eck.tech") return true;
     if (origin === "http://localhost:3000" || origin === "http://localhost:3001") return true;
-    return url.protocol === "https:" && /^3eck-website-[a-z0-9-]+-3eck\\.vercel\\.app$/.test(url.hostname);
+    return url.protocol === "https:" && /^3eck-website-[a-z0-9-]+-3eck\.vercel\.app$/.test(url.hostname);
   } catch {
     return false;
   }

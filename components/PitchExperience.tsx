@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { applyStreamEvent, displayBrand, latestCaption, normalizeMessages, tailCaption, type LiveCaption, type TranscriptLine } from "@/lib/pitch/transcript";
 import { HARD_STOP_SECONDS } from "@/lib/pitch/timer";
+import { isTrustedAdvisorParent, readAdvisorExample } from "@/lib/pitch/advisor-message";
 import { ContactCard } from "./ContactCard";
 import { StatusSheet } from "./StatusSheet";
 import { TrySheet } from "./TrySheet";
@@ -10,9 +11,9 @@ import { CloseIcon, InfoIcon, KeyboardIcon, MicIcon, MicOffIcon } from "./icons"
 
 type Phase = "intro" | "connecting" | "live" | "ended" | "error";
 type AnamClient = import("@anam-ai/js-sdk").AnamClient;
-type PersonaKey = "twin" | "jeroen";
+type PersonaKey = "twin" | "jeroen" | "advisor";
 
-const BADGE: Record<PersonaKey, string> = { twin: "AI twin of Volker", jeroen: "Jeroen · EarthSpas sales avatar" };
+const BADGE: Record<PersonaKey, string> = { twin: "AI twin of Volker", jeroen: "Jeroen · EarthSpas sales avatar", advisor: "3ECK AI · Project advisor" };
 
 const VIDEO_ID = "twin-video";
 
@@ -26,9 +27,9 @@ const MESSAGES: Record<string, string> = {
   network: "No connection. Check your network and try again.",
 };
 
-export function PitchExperience({ embedded = false }: { embedded?: boolean }) {
+export function PitchExperience({ embedded = false, advisor = false }: { embedded?: boolean; advisor?: boolean }) {
   const [phase, setPhase] = useState<Phase>("intro");
-  const [persona, setPersona] = useState<PersonaKey>("twin");
+  const [persona, setPersona] = useState<PersonaKey>(advisor ? "advisor" : "twin");
   const [error, setError] = useState<string | null>(null);
   const [needsCode, setNeedsCode] = useState(false);
   const [code, setCode] = useState("");
@@ -38,6 +39,7 @@ export function PitchExperience({ embedded = false }: { embedded?: boolean }) {
   const [micDenied, setMicDenied] = useState(false);
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState("");
+  const [exampleQuestion, setExampleQuestion] = useState<string | null>(null);
 
   const clientRef = useRef<AnamClient | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -82,6 +84,21 @@ export function PitchExperience({ embedded = false }: { embedded?: boolean }) {
     void clientRef.current?.stopStreaming().catch(() => undefined);
   }, [stopTimer]);
 
+  // Only the 3ECK website may suggest a question; visitors choose when to send it.
+  useEffect(() => {
+    if (!advisor || window.parent === window) return;
+    const receiveExample = (event: MessageEvent<unknown>) => {
+      if (event.source !== window.parent || !isTrustedAdvisorParent(event.origin)) return;
+      const example = readAdvisorExample(event.data);
+      if (!example) return;
+      setExampleQuestion(example);
+      setDraft(example);
+      if (clientRef.current) setTyping(true);
+    };
+    window.addEventListener("message", receiveExample);
+    return () => window.removeEventListener("message", receiveExample);
+  }, [advisor]);
+
   async function start(key: PersonaKey = "twin") {
     endingRef.current = false;
     setPersona(key);
@@ -90,7 +107,8 @@ export function PitchExperience({ embedded = false }: { embedded?: boolean }) {
     setLive(null);
     setMuted(false);
     setMicDenied(false);
-    setTyping(false);
+    setTyping(advisor && Boolean(exampleQuestion));
+    setDraft(advisor ? (exampleQuestion ?? "") : "");
     setPhase("connecting");
 
     try {
@@ -174,10 +192,10 @@ export function PitchExperience({ embedded = false }: { embedded?: boolean }) {
 
   return (
     <main className="pitch">
-      <div className="stage" data-phase={phase}>
+      <div className="stage" data-phase={phase} data-advisor={advisor}>
         <div className="frame-glow" aria-hidden="true" />
         <div className="frame">
-          <video id={VIDEO_ID} className="video" playsInline autoPlay aria-label={persona === "twin" ? "Volker's AI twin" : "Jeroen, sales avatar for EarthSpas"} />
+          <video id={VIDEO_ID} className="video" playsInline autoPlay aria-label={persona === "advisor" ? "3ECK AI project advisor" : persona === "twin" ? "Volker's AI twin" : "Jeroen, sales avatar for EarthSpas"} />
         </div>
 
         <header className="topbar">
@@ -192,7 +210,8 @@ export function PitchExperience({ embedded = false }: { embedded?: boolean }) {
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="logo" src="/brand/3eck-logo.png" alt="3ECK Technology" />
-            <h1 id="intro-title" className="tagline">{embedded ? "Talk to Volker's AI twin" : "60 seconds with Volker's AI twin"}</h1>
+            <h1 id="intro-title" className="tagline">{advisor ? "Tell us what you want to build" : embedded ? "Talk to Volker's AI twin" : "60 seconds with Volker's AI twin"}</h1>
+            {advisor && exampleQuestion && <p className="advisor-choice" role="status">Your question: {exampleQuestion}</p>}
             {needsCode && (
               <div className="field">
                 <label htmlFor="code">Invitation code</label>
@@ -200,7 +219,7 @@ export function PitchExperience({ embedded = false }: { embedded?: boolean }) {
               </div>
             )}
             {error && <p className="notice" role="alert">{error}</p>}
-            <button type="button" className="btn btn-primary" onClick={() => void start("twin")}>{embedded ? "Start conversation" : "Invest now"}</button>
+            <button type="button" className="btn btn-primary" onClick={() => void start(advisor ? "advisor" : "twin")}>{advisor ? "Talk to my AI advisor" : embedded ? "Start conversation" : "Invest now"}</button>
             {embedded ? (
               <div className="links"><a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy</a></div>
             ) : (
@@ -210,14 +229,14 @@ export function PitchExperience({ embedded = false }: { embedded?: boolean }) {
                 <a href="/privacy">Privacy</a>
               </div>
             )}
-            <p className="fine">You will talk to an AI, not to Volker himself. Needs your microphone. Your voice is processed live by our avatar partner, Anam. Please do not share confidential information.</p>
+            <p className="fine">{advisor ? "I'm an AI, not a real person. Your voice is processed by Anam. Please avoid confidential data. This conversation does not create an order or a binding quote." : "You will talk to an AI, not to Volker himself. Needs your microphone. Your voice is processed live by our avatar partner, Anam. Please do not share confidential information."}</p>
           </section>
         )}
 
         {phase === "connecting" && (
           <section className="panel" aria-live="polite">
             <span className="pulse" aria-hidden="true" />
-            <h2>Waking up the twin</h2>
+            <h2>{advisor ? "Connecting your advisor" : "Waking up the twin"}</h2>
             <p className="fine">Allow the microphone when your browser asks.</p>
           </section>
         )}
@@ -248,8 +267,13 @@ export function PitchExperience({ embedded = false }: { embedded?: boolean }) {
 
         {phase === "ended" && (
           <section className="panel" aria-labelledby="end-title">
-            <h2 id="end-title">{embedded ? "Conversation ended." : persona === "twin" ? "That was the twin." : "That was Jeroen."}</h2>
-            {embedded ? <p className="lead">Thanks for talking with our AI twin.</p> : (
+            <h2 id="end-title">{advisor ? "Let's take the next step." : embedded ? "Conversation ended." : persona === "twin" ? "That was the twin." : "That was Jeroen."}</h2>
+            {advisor ? (
+              <>
+                <p className="lead">Want to take this idea further? Our team can review the scope and prepare a proposal.</p>
+                <a className="btn btn-primary" href="https://site.3eck.tech/contact" target="_blank" rel="noopener noreferrer">Contact 3ECK</a>
+              </>
+            ) : embedded ? <p className="lead">Thanks for talking with our AI twin.</p> : (
               <>
                 <p className="lead">{persona === "twin" ? "If it made you curious, the real Volker would love to talk." : "A sales avatar like this can sit on your website. The real Volker would love to talk."}</p>
                 <ContactCard />

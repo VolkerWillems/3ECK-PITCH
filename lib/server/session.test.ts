@@ -6,7 +6,7 @@ describe("readSessionConfig", () => {
   it("needs both the API key and the persona id", () => {
     expect(readSessionConfig({})).toBeNull();
     expect(readSessionConfig({ ANAM_API_KEY: "k" })).toBeNull();
-    expect(readSessionConfig({ ANAM_API_KEY: " k ", ANAM_PERSONA_ID: " p " })).toMatchObject({ apiKey: "k", personas: { twin: "p", jeroen: undefined }, maxPerIp: 3, maxPerDay: 100 });
+    expect(readSessionConfig({ ANAM_API_KEY: " k ", ANAM_PERSONA_ID: " p " })).toMatchObject({ apiKey: "k", personas: { twin: "p", jeroen: undefined, build: "p" }, maxPerIp: 3, maxPerDay: 100 });
   });
   it("reads limits and ignores nonsense values", () => {
     const c = readSessionConfig({ ANAM_API_KEY: "k", ANAM_PERSONA_ID: "p", PITCH_MAX_SESSIONS_PER_IP: "5", PITCH_MAX_SESSIONS_PER_DAY: "-1", PITCH_INVITE_CODE: " abc " });
@@ -73,9 +73,11 @@ describe("createLimiter", () => {
 
 describe("personas", () => {
   it("reads the optional Jeroen persona and defaults to the twin", () => {
-    expect(readSessionConfig({ ANAM_API_KEY: "k", ANAM_PERSONA_ID: "p", ANAM_PERSONA_ID_JEROEN: " j " })?.personas).toEqual({ twin: "p", jeroen: "j" });
+    expect(readSessionConfig({ ANAM_API_KEY: "k", ANAM_PERSONA_ID: "p", ANAM_PERSONA_ID_JEROEN: " j " })?.personas).toEqual({ twin: "p", jeroen: "j", build: "p" });
+    expect(readSessionConfig({ ANAM_API_KEY: "k", ANAM_PERSONA_ID: "p", ANAM_PERSONA_ID_BUILD: " builder " })?.personas.build).toBe("builder");
     expect(parsePersona(undefined)).toBe("twin");
     expect(parsePersona("jeroen")).toBe("jeroen");
+    expect(parsePersona("build")).toBe("build");
     expect(parsePersona("admin")).toBeNull();
     expect(parsePersona(3)).toBeNull();
   });

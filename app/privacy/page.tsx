@@ -14,6 +14,13 @@ export default function PrivacyPage() {
         Your microphone audio and anything you type are sent live to our avatar provider, Anam, so the AI twin can hear and answer
         you. This page itself sets no tracking cookies and asks for no personal data, so please do not share confidential information.
       </p>
+      <h2>Sharing a project brief</h2>
+      <p>
+        In the optional build-intake pilot, you may review and edit a description of your project after the conversation.
+        Only if you select "Share brief with 3ECK site" is that text passed to the trusted 3ECK-WEBSITE page.
+        The receiving page keeps the brief in your browser until you choose to copy it or open an email draft.
+        A draft is not sent automatically. No payment or build order is created by this action.
+      </p>
       <h2>The demo call</h2>
       <p>
         If you use a personal code to be called by our outbound sales agent, your mobile number is sent to our voice partner,

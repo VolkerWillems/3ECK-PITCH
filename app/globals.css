@@ -203,3 +203,15 @@ dialog.sheet::backdrop { background: #000000b3; }
 .callform { display: flex; flex-direction: column; gap: 14px; align-self: stretch; }
 .check { display: flex; gap: 12px; align-items: flex-start; font-size: var(--text-sm); line-height: 1.4; cursor: pointer; }
 .check input { width: 22px; height: 22px; margin: 1px 0 0; flex: none; accent-color: var(--pitch-primary); }
+
+/* Corporate website embed: the visitor reviews their brief before any handoff. */
+.panel-build { justify-content: flex-start; gap: 12px; overflow-y: auto; padding-top: 84px; }
+.panel-build .stack { margin-top: auto; }
+.build-intake { display: flex; flex-direction: column; gap: 9px; }
+.build-intake label { color: var(--faint); font-size: var(--text-sm); }
+.build-intake textarea {
+  width: 100%; min-height: 116px; padding: 12px; resize: vertical;
+  border: 1px solid var(--copper-border); border-radius: var(--radius);
+  background: var(--input); color: var(--foreground); font: inherit; font-size: 1rem;
+}
+.build-intake .btn-primary { width: 100%; }

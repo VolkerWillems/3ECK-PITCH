@@ -61,3 +61,20 @@ node scripts/make-codes.mjs 50 /path/outside/the/repo/codes.txt   # more codes: 
 ```
 
 Calls to non-Dutch numbers are refused until the phone line can place them.
+
+## Corporate website build-intake pilot (2026-11-02)
+
+The existing investor experience at `/` is unchanged. The opt-in route
+`/?mode=build` adjusts the introduction and lets a visitor review/edit
+a project brief after speaking with the same Anam twin. An explicit
+**Share brief with 3ECK site** action sends only the reviewed text via
+`postMessage` to a trusted `3ECK-WEBSITE` parent origin. The consumer
+must verify the sender origin and iframe window. No conversation transcript
+is persisted by this feature.
+
+This is a *discovery pilot*: the underlying Anam persona is still the
+investor twin. It is not yet a specialist estimator. There is no
+approved price catalogue, payment integration or automated builder
+handoff here. Never treat answers during the avatar conversation as
+a binding quote or refund promise. Real payment and build automation
+must be integrated and accepted separately.

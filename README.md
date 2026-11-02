@@ -23,6 +23,7 @@ npm run dev
 | `ANAM_API_KEY` | Server only. Create it in Anam Lab. |
 | `ANAM_PERSONA_ID` | The persona with the investor prompt and knowledge. |
 | `ANAM_PERSONA_ID_JEROEN` | Optional. The Jeroen sales avatar for the "Test sales avatar" button. |
+| `ANAM_PERSONA_ID_BUILD` | Optional. Dedicated 3ECK build advisor persona; uses the existing twin as a temporary fallback. |
 | `ELEVENLABS_API_KEY`, `ELEVENLABS_CALL_AGENT_ID`, `ELEVENLABS_PHONE_NUMBER_ID` | Optional, all three. The one-time outbound call (Jay). Also needs the Upstash Redis store (Vercel, Storage, Marketplace), which adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`. |
 | `PITCH_INVITE_CODE` | Optional. When set, visitors must enter it. |
 | `PITCH_MAX_SESSIONS_PER_IP`, `PITCH_MAX_SESSIONS_PER_DAY` | Optional limits (defaults 3 per 10 minutes per visitor, 100 per day). |
@@ -72,8 +73,8 @@ a project brief after speaking with the same Anam twin. An explicit
 must verify the sender origin and iframe window. No conversation transcript
 is persisted by this feature.
 
-This is a *discovery pilot*: the underlying Anam persona is still the
-investor twin. It is not yet a specialist estimator. There is no
+This is a *discovery pilot*: until `ANAM_PERSONA_ID_BUILD` is configured,
+the underlying Anam persona remains the investor twin. It is not yet a specialist estimator. There is no
 approved price catalogue, payment integration or automated builder
 handoff here. Never treat answers during the avatar conversation as
 a binding quote or refund promise. Real payment and build automation

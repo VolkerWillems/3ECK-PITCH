@@ -41,7 +41,7 @@ export function PitchExperience({ mode = "pitch" }: { mode?: "pitch" | "build" }
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState("");
   const [briefDraft, setBriefDraft] = useState("");
-  const [briefSent, setBriefSent] = useState(false);
+  const [briefNotice, setBriefNotice] = useState("");
 
   const clientRef = useRef<AnamClient | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -102,7 +102,7 @@ export function PitchExperience({ mode = "pitch" }: { mode?: "pitch" | "build" }
     setMicDenied(false);
     setTyping(false);
     setBriefDraft("");
-    setBriefSent(false);
+    setBriefNotice("");
     setPhase("connecting");
 
     try {
@@ -181,20 +181,26 @@ export function PitchExperience({ mode = "pitch" }: { mode?: "pitch" | "build" }
     }
   }
 
-  function shareBuildBrief() {
+  async function shareBuildBrief() {
     const text = briefDraft.trim();
     const trustedParent = trustedBuildParentOrigin(document.referrer);
-    if (!trustedParent || window.parent === window) {
-      setError("Open this conversation from the 3ECK website to share a brief.");
-      return;
-    }
     if (text.length < 10) {
       setError("Describe the problem in at least ten characters before sending.");
       return;
     }
-    window.parent.postMessage({ type: "3eck:build-brief", version: 1, text }, trustedParent);
-    setBriefSent(true);
-    setError(null);
+    if (trustedParent && window.parent !== window) {
+      window.parent.postMessage({ type: "3eck:build-brief", version: 1, text }, trustedParent);
+      setBriefNotice("Brief shared. Review it on the 3ECK website before requesting a quote.");
+      setError(null);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setBriefNotice("Brief copied. Return to the 3ECK website and paste it into the request.");
+      setError(null);
+    } catch {
+      setError("Copy your description manually and paste it into the 3ECK website request.");
+    }
   }
 
   const caption = displayBrand(live ? tailCaption(live.text) : latestCaption(lines));
@@ -280,7 +286,7 @@ export function PitchExperience({ mode = "pitch" }: { mode?: "pitch" | "build" }
                 <textarea
                   id="build-brief"
                   value={briefDraft}
-                  onChange={(event) => { setBriefDraft(event.target.value); setBriefSent(false); }}
+                  onChange={(event) => { setBriefDraft(event.target.value); setBriefNotice(""); }}
                   rows={5}
                   maxLength={MAX_BUILD_BRIEF_LENGTH}
                   placeholder="What should the tool, app, or agent do?"
@@ -288,7 +294,7 @@ export function PitchExperience({ mode = "pitch" }: { mode?: "pitch" | "build" }
                 <button type="button" className="btn btn-primary" onClick={shareBuildBrief} disabled={briefDraft.trim().length < 10}>
                   Share brief with 3ECK site
                 </button>
-                {briefSent && <p className="fine" role="status">Brief shared. Review it on the 3ECK website before requesting a quote.</p>}
+                {briefNotice && <p className="fine" role="status">{briefNotice}</p>}
                 {error && <p className="notice" role="alert">{error}</p>}
               </div>
             ) : (

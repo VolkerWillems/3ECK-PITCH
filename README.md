@@ -61,3 +61,23 @@ node scripts/make-codes.mjs 50 /path/outside/the/repo/codes.txt   # more codes: 
 ```
 
 Calls to non-Dutch numbers are refused until the phone line can place them.
+
+## Corporate website AI project advisor (candidate, 2026-11-02)
+
+The original investor page (`/`) and `/?embed=1` retain their behavior.
+`/?embed=advisor` is an opt-in, website-facing discovery experience using
+the existing PITCH avatar, voice and LLM. The server reads the existing
+persona metadata via the Anam Personas API using `ANAM_API_KEY`, then
+mints a **separate ephemeral persona** with the 3ECK project-advisor prompt.
+It does not edit the existing persona or disclose provider credentials.
+
+Only the trusted 3ECK website origin (and scoped Vercel previews/local
+development) may send a versioned `3eck:advisor-example` message. This
+prefills a question for the visitor to review and send; it does not start
+a paid session or send messages automatically. Session rates and the
+existing hard-stop remain in effect.
+
+The advisor helps scope an idea; it cannot create a binding quote,
+accept payment, create orders or run 3ECK builders. The customer must
+contact 3ECK separately to request a real proposal. Provider API
+permissions and live microphone behavior still need testing.

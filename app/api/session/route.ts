@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createLimiter } from "@/lib/server/rate-limit";
+import { mintAdvisorSessionToken } from "@/lib/server/advisor";
 import { clientKey, inviteCodeMatches, mintSessionToken, parsePersona, readSessionConfig, SessionTokenError } from "@/lib/server/session";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as { inviteCode?: unknown; persona?: unknown };
   const persona = parsePersona(body.persona);
   if (!persona) return fail(400, "unknown_persona");
-  const personaId = config.personas[persona];
+  const personaId = persona === "advisor" ? config.personas.twin : config.personas[persona];
   if (!personaId) return fail(503, "not_configured");
   if (config.inviteCode && !inviteCodeMatches(config.inviteCode, body.inviteCode)) return fail(401, "invite_required");
 
@@ -33,7 +34,9 @@ export async function POST(request: Request) {
   if (!everyone.allowed) return fail(429, "daily_limit", { retryAfterSeconds: everyone.retryAfterSeconds }, { "Retry-After": String(everyone.retryAfterSeconds) });
 
   try {
-    const sessionToken = await mintSessionToken({ apiKey: config.apiKey, personaId });
+    const sessionToken = persona === "advisor"
+      ? await mintAdvisorSessionToken({ apiKey: config.apiKey, sourcePersonaId: personaId })
+      : await mintSessionToken({ apiKey: config.apiKey, personaId });
     return NextResponse.json({ sessionToken }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     // log the reason for the operator; the visitor only learns that the twin is unavailable

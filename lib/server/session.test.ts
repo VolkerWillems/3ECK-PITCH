@@ -76,6 +76,7 @@ describe("personas", () => {
     expect(readSessionConfig({ ANAM_API_KEY: "k", ANAM_PERSONA_ID: "p", ANAM_PERSONA_ID_JEROEN: " j " })?.personas).toEqual({ twin: "p", jeroen: "j" });
     expect(parsePersona(undefined)).toBe("twin");
     expect(parsePersona("jeroen")).toBe("jeroen");
+    expect(parsePersona("advisor")).toBe("advisor");
     expect(parsePersona("admin")).toBeNull();
     expect(parsePersona(3)).toBeNull();
   });

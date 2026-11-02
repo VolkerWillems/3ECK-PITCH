@@ -2,8 +2,8 @@ import { timingSafeEqual } from "node:crypto";
 
 export type SessionEnv = Record<string, string | undefined>;
 
-export type PersonaKey = "twin" | "jeroen";
-export const PERSONA_KEYS: PersonaKey[] = ["twin", "jeroen"];
+export type PersonaKey = "twin" | "jeroen" | "advisor";
+export const PERSONA_KEYS: PersonaKey[] = ["twin", "jeroen", "advisor"];
 
 export type SessionConfig = {
   apiKey: string;
@@ -56,13 +56,18 @@ const TOKEN_URL = "https://api.anam.ai/v1/auth/session-token";
 export class SessionTokenError extends Error {}
 
 /** Exchange the server-side API key for a short-lived token the browser can use. */
-export async function mintSessionToken(config: { apiKey: string; personaId: string }, fetchImpl: typeof fetch = fetch): Promise<string> {
+type EphemeralPersona = { name: string; avatarId: string; voiceId: string; llmId: string; systemPrompt: string; avatarModel?: string };
+
+export async function mintSessionToken(
+  config: { apiKey: string } & ({ personaId: string; personaConfig?: never } | { personaId?: never; personaConfig: EphemeralPersona }),
+  fetchImpl: typeof fetch = fetch,
+): Promise<string> {
   let response: Response;
   try {
     response = await fetchImpl(TOKEN_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ personaConfig: { personaId: config.personaId } }),
+      body: JSON.stringify({ personaConfig: config.personaConfig ?? { personaId: config.personaId } }),
       signal: AbortSignal.timeout(8000),
     });
   } catch {

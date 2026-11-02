@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { applyStreamEvent, displayBrand, latestCaption, normalizeMessages, tailCaption, type LiveCaption, type TranscriptLine } from "@/lib/pitch/transcript";
 import { HARD_STOP_SECONDS } from "@/lib/pitch/timer";
+import { conversationToBuildBrief, MAX_BUILD_BRIEF_LENGTH, trustedBuildParentOrigin } from "@/lib/pitch/build-embed";
 import { ContactCard } from "./ContactCard";
 import { StatusSheet } from "./StatusSheet";
 import { TrySheet } from "./TrySheet";
@@ -26,7 +27,8 @@ const MESSAGES: Record<string, string> = {
   network: "No connection. Check your network and try again.",
 };
 
-export function PitchExperience() {
+export function PitchExperience({ mode = "pitch" }: { mode?: "pitch" | "build" }) {
+  const isBuild = mode === "build";
   const [phase, setPhase] = useState<Phase>("intro");
   const [persona, setPersona] = useState<PersonaKey>("twin");
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +40,8 @@ export function PitchExperience() {
   const [micDenied, setMicDenied] = useState(false);
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState("");
+  const [briefDraft, setBriefDraft] = useState("");
+  const [briefSent, setBriefSent] = useState(false);
 
   const clientRef = useRef<AnamClient | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -82,6 +86,12 @@ export function PitchExperience() {
     void clientRef.current?.stopStreaming().catch(() => undefined);
   }, [stopTimer]);
 
+  useEffect(() => {
+    if (isBuild && phase === "ended") {
+      setBriefDraft((current) => current || conversationToBuildBrief(lines));
+    }
+  }, [isBuild, phase, lines]);
+
   async function start(key: PersonaKey = "twin") {
     endingRef.current = false;
     setPersona(key);
@@ -91,6 +101,8 @@ export function PitchExperience() {
     setMuted(false);
     setMicDenied(false);
     setTyping(false);
+    setBriefDraft("");
+    setBriefSent(false);
     setPhase("connecting");
 
     try {
@@ -169,6 +181,22 @@ export function PitchExperience() {
     }
   }
 
+  function shareBuildBrief() {
+    const text = briefDraft.trim();
+    const trustedParent = trustedBuildParentOrigin(document.referrer);
+    if (!trustedParent || window.parent === window) {
+      setError("Open this conversation from the 3ECK website to share a brief.");
+      return;
+    }
+    if (text.length < 10) {
+      setError("Describe the problem in at least ten characters before sending.");
+      return;
+    }
+    window.parent.postMessage({ type: "3eck:build-brief", version: 1, text }, trustedParent);
+    setBriefSent(true);
+    setError(null);
+  }
+
   const caption = displayBrand(live ? tailCaption(live.text) : latestCaption(lines));
   const lastUser = [...lines].reverse().find((l) => l.role === "user")?.text;
 
@@ -192,7 +220,7 @@ export function PitchExperience() {
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="logo" src="/brand/3eck-logo.png" alt="3ECK Technology" />
-            <h1 id="intro-title" className="tagline">60 seconds with Volker&apos;s AI twin</h1>
+            <h1 id="intro-title" className="tagline">{isBuild ? "Tell our AI what you want to build" : "60 seconds with Volker\u0027s AI twin"}</h1>
             {needsCode && (
               <div className="field">
                 <label htmlFor="code">Invitation code</label>
@@ -200,7 +228,7 @@ export function PitchExperience() {
               </div>
             )}
             {error && <p className="notice" role="alert">{error}</p>}
-            <button type="button" className="btn btn-primary" onClick={() => void start("twin")}>Invest now</button>
+            <button type="button" className="btn btn-primary" onClick={() => void start("twin")}>{isBuild ? "Discuss my project" : "Invest now"}</button>
             <div className="links">
               <button type="button" onClick={() => sheetRef.current?.showModal()}>What is real today</button>
               <button type="button" onClick={() => trySheetRef.current?.showModal()}>Try our agents</button>
@@ -243,13 +271,35 @@ export function PitchExperience() {
         )}
 
         {phase === "ended" && (
-          <section className="panel" aria-labelledby="end-title">
-            <h2 id="end-title">{persona === "twin" ? "That was the twin." : "That was Jeroen."}</h2>
-            <p className="lead">{persona === "twin" ? "If it made you curious, the real Volker would love to talk." : "A sales avatar like this can sit on your website. The real Volker would love to talk."}</p>
-            <ContactCard />
+          <section className={isBuild ? "panel panel-build" : "panel"} aria-labelledby="end-title">
+            <h2 id="end-title">{isBuild ? "Your project brief" : persona === "twin" ? "That was the twin." : "That was Jeroen."}</h2>
+            {isBuild ? (
+              <div className="build-intake">
+                <p className="fine">Review what you shared. Only the text below is passed back to 3ECK-WEBSITE, and only when you choose to share it.</p>
+                <label htmlFor="build-brief">Your project description</label>
+                <textarea
+                  id="build-brief"
+                  value={briefDraft}
+                  onChange={(event) => { setBriefDraft(event.target.value); setBriefSent(false); }}
+                  rows={5}
+                  maxLength={MAX_BUILD_BRIEF_LENGTH}
+                  placeholder="What should the tool, app, or agent do?"
+                />
+                <button type="button" className="btn btn-primary" onClick={shareBuildBrief} disabled={briefDraft.trim().length < 10}>
+                  Share brief with 3ECK site
+                </button>
+                {briefSent && <p className="fine" role="status">Brief shared. Review it on the 3ECK website before requesting a quote.</p>}
+                {error && <p className="notice" role="alert">{error}</p>}
+              </div>
+            ) : (
+              <>
+                <p className="lead">{persona === "twin" ? "If it made you curious, the real Volker would love to talk." : "A sales avatar like this can sit on your website. The real Volker would love to talk."}</p>
+                <ContactCard />
+              </>
+            )}
             <div className="stack">
-              <button type="button" className="btn btn-primary" onClick={() => void start(persona)}>{persona === "twin" ? "Challenge it again" : "Test it again"}</button>
-              <button type="button" className="btn btn-ghost" onClick={() => trySheetRef.current?.showModal()}>Try our other agents</button>
+              <button type="button" className="btn btn-primary" onClick={() => void start(persona)}>{isBuild ? "Talk again" : persona === "twin" ? "Challenge it again" : "Test it again"}</button>
+              {!isBuild && <button type="button" className="btn btn-ghost" onClick={() => trySheetRef.current?.showModal()}>Try our other agents</button>}
               <button type="button" className="btn btn-ghost" onClick={() => sheetRef.current?.showModal()}><InfoIcon />What is real today</button>
             </div>
           </section>
